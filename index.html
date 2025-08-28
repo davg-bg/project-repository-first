@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCB - Sistema de Gerenciamento de Ferramentas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-church"></i>
+                    <h1>CCB Ferramentas</h1>
+                </div>
+                <nav class="nav">
+                    <a href="#home" class="nav-link active">Início</a>
+                    <a href="#ferramentas" class="nav-link">Ferramentas</a>
+                    <a href="#relatorios" class="nav-link">Relatórios</a>
+                    <a href="#configuracoes" class="nav-link">Configurações</a>
+                </nav>
+                <div class="user-menu">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Administrador</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Section -->
+            <section id="home" class="section active">
+                <div class="dashboard">
+                    <h2>Dashboard</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card clickable" onclick="filterByStatus()">
+                            <div class="stat-icon">
+                                <i class="fas fa-wrench"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="total-ferramentas">0</h3>
+                                <p>Total de Ferramentas</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card clickable" onclick="filterByStatus('disponivel')">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="ferramentas-disponiveis">0</h3>
+                                <p>Disponíveis</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card clickable" onclick="filterByStatus('em-uso')">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="ferramentas-em-uso">0</h3>
+                                <p>Em Uso</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card clickable" onclick="filterByStatus('manutencao')">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="ferramentas-manutencao">0</h3>
+                                <p>Em Manutenção</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <h3>Ações Rápidas</h3>
+                        <div class="actions-grid">
+                            <button class="action-btn" onclick="showAddToolModal()">
+                                <i class="fas fa-plus"></i>
+                                Nova Ferramenta
+                            </button>
+                            <button class="action-btn" onclick="showSearchModal()">
+                                <i class="fas fa-search"></i>
+                                Buscar Ferramenta
+                            </button>
+                            <button class="action-btn" onclick="exportData()">
+                                <i class="fas fa-download"></i>
+                                Exportar Dados
+                            </button>
+                            <button class="action-btn" onclick="showMaintenanceModal()">
+                                <i class="fas fa-tools"></i>
+                                Agendar Manutenção
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tools Management Section -->
+            <section id="ferramentas" class="section">
+                <div class="tools-management">
+                    <div class="section-header">
+                        <h2>Gerenciamento de Ferramentas</h2>
+                        <div class="section-actions">
+                            <button class="btn-primary" onclick="showAddToolModal()">
+                                <i class="fas fa-plus"></i>
+                                Adicionar
+                            </button>
+                            <button class="btn-secondary" onclick="triggerImportXlsx()">
+                                <i class="fas fa-file-import"></i>
+                                Importar XLSX
+                            </button>
+                            <button class="btn-secondary" onclick="downloadXlsxTemplate()">
+                                <i class="fas fa-file-excel"></i>
+                                Baixar Modelo
+                            </button>
+                            <input id="xlsx-file-input" type="file" accept=".xlsx,.xls" style="display:none" />
+                        </div>
+                    </div>
+
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="status-filter">Status:</label>
+                            <select id="status-filter" onchange="filterTools()">
+                                <option value="">Todos</option>
+                                <option value="disponivel">Disponível</option>
+                                <option value="em-uso">Em Uso</option>
+                                <option value="manutencao">Em Manutenção</option>
+                                <option value="inativo">Inativo</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="category-filter">Categoria:</label>
+                            <select id="category-filter" onchange="filterTools()">
+                                <option value="">Todas</option>
+                                <option value="eletrica">Elétrica</option>
+                                <option value="manual">Manual</option>
+                                <option value="hidraulica">Hidráulica</option>
+                                <option value="pneumatica">Pneumática</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <input type="text" id="search-input" placeholder="Buscar ferramenta..." onkeyup="filterTools()">
+                        </div>
+                    </div>
+
+                    <div class="tools-table-container">
+                        <table class="tools-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nome</th>
+                                    <th>Categoria</th>
+                                    <th>Status</th>
+                                    <th>Localização</th>
+                                    <th>Última Manutenção</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tools-table-body">
+                                <!-- Tools will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="relatorios" class="section">
+                <div class="reports">
+                    <h2>Relatórios</h2>
+                    <div class="reports-grid">
+                        <div class="report-card">
+                            <h3>Relatório de Uso</h3>
+                            <p>Visualize o histórico de uso das ferramentas</p>
+                            <button class="btn-secondary" onclick="generateUsageReport()">
+                                Gerar Relatório
+                            </button>
+                        </div>
+                        <div class="report-card">
+                            <h3>Relatório de Manutenção</h3>
+                            <p>Controle de manutenções preventivas e corretivas</p>
+                            <button class="btn-secondary" onclick="generateMaintenanceReport()">
+                                Gerar Relatório
+                            </button>
+                        </div>
+                        <div class="report-card">
+                            <h3>Relatório de Inventário</h3>
+                            <p>Inventário completo de todas as ferramentas</p>
+                            <button class="btn-secondary" onclick="generateInventoryReport()">
+                                Gerar Relatório
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="configuracoes" class="section">
+                <div class="settings">
+                    <h2>Configurações</h2>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <h3>Configurações Gerais</h3>
+                            <form class="settings-form">
+                                <div class="form-group">
+                                    <label for="company-name">Nome da Empresa:</label>
+                                    <input type="text" id="company-name" value="CCB - Companhia de Construção e Beneficiamento">
+                                </div>
+                                <div class="form-group">
+                                    <label for="backup-frequency">Frequência de Backup:</label>
+                                    <select id="backup-frequency">
+                                        <option value="daily">Diário</option>
+                                        <option value="weekly">Semanal</option>
+                                        <option value="monthly">Mensal</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn-primary">Salvar Configurações</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Add Tool Modal -->
+    <div id="add-tool-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adicionar Nova Ferramenta</h3>
+                <span class="close" onclick="closeModal('add-tool-modal')">&times;</span>
+            </div>
+            <form id="add-tool-form" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tool-code">Código:</label>
+                        <input type="text" id="tool-code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tool-name">Nome:</label>
+                        <input type="text" id="tool-name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tool-category">Categoria:</label>
+                        <select id="tool-category" required>
+                            <option value="">Selecione...</option>
+                            <option value="eletrica">Elétrica</option>
+                            <option value="manual">Manual</option>
+                            <option value="hidraulica">Hidráulica</option>
+                            <option value="pneumatica">Pneumática</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tool-status">Status:</label>
+                        <select id="tool-status" required>
+                            <option value="disponivel">Disponível</option>
+                            <option value="em-uso">Em Uso</option>
+                            <option value="manutencao">Em Manutenção</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tool-location">Localização:</label>
+                        <input type="text" id="tool-location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tool-purchase-date">Data de Aquisição:</label>
+                        <input type="date" id="tool-purchase-date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tool-description">Descrição:</label>
+                    <textarea id="tool-description" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('add-tool-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Tool Modal -->
+    <div id="edit-tool-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Ferramenta</h3>
+                <span class="close" onclick="closeModal('edit-tool-modal')">&times;</span>
+            </div>
+            <form id="edit-tool-form" class="modal-form">
+                <input type="hidden" id="edit-tool-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-tool-code">Código:</label>
+                        <input type="text" id="edit-tool-code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-tool-name">Nome:</label>
+                        <input type="text" id="edit-tool-name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-tool-category">Categoria:</label>
+                        <select id="edit-tool-category" required>
+                            <option value="">Selecione...</option>
+                            <option value="eletrica">Elétrica</option>
+                            <option value="manual">Manual</option>
+                            <option value="hidraulica">Hidráulica</option>
+                            <option value="pneumatica">Pneumática</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-tool-status">Status:</label>
+                        <select id="edit-tool-status" required>
+                            <option value="disponivel">Disponível</option>
+                            <option value="em-uso">Em Uso</option>
+                            <option value="manutencao">Em Manutenção</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-tool-location">Localização:</label>
+                        <input type="text" id="edit-tool-location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-tool-purchase-date">Data de Aquisição:</label>
+                        <input type="date" id="edit-tool-purchase-date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tool-description">Descrição:</label>
+                    <textarea id="edit-tool-description" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('edit-tool-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+         <!-- Search Modal -->
+     <div id="search-modal" class="modal">
+         <div class="modal-content">
+             <div class="modal-header">
+                 <h3>Busca Avançada de Ferramentas</h3>
+                 <span class="close" onclick="closeModal('search-modal')">&times;</span>
+             </div>
+             <div class="modal-body">
+                 <div class="search-form">
+                     <div class="form-group">
+                         <label for="search-term">Termo de Busca:</label>
+                         <input type="text" id="search-term" placeholder="Digite o nome, código ou descrição...">
+                     </div>
+                     <div class="form-row">
+                         <div class="form-group">
+                             <label for="search-category">Categoria:</label>
+                             <select id="search-category">
+                                 <option value="">Todas as categorias</option>
+                                 <option value="eletrica">Elétrica</option>
+                                 <option value="manual">Manual</option>
+                                 <option value="hidraulica">Hidráulica</option>
+                                 <option value="pneumatica">Pneumática</option>
+                             </select>
+                         </div>
+                         <div class="form-group">
+                             <label for="search-status">Status:</label>
+                             <select id="search-status">
+                                 <option value="">Todos os status</option>
+                                 <option value="disponivel">Disponível</option>
+                                 <option value="em-uso">Em Uso</option>
+                                 <option value="manutencao">Em Manutenção</option>
+                                 <option value="inativo">Inativo</option>
+                             </select>
+                         </div>
+                     </div>
+                     <div class="form-row">
+                         <div class="form-group">
+                             <label for="search-location">Localização:</label>
+                             <input type="text" id="search-location" placeholder="Digite a localização...">
+                         </div>
+                         <div class="form-group">
+                             <label for="search-date">Data de Aquisição:</label>
+                             <input type="date" id="search-date">
+                         </div>
+                     </div>
+                 </div>
+                 <div id="search-results" class="search-results">
+                     <!-- Resultados da busca serão exibidos aqui -->
+                 </div>
+             </div>
+             <div class="modal-actions">
+                 <button type="button" class="btn-secondary" onclick="closeModal('search-modal')">Fechar</button>
+                 <button type="button" class="btn-primary" onclick="performAdvancedSearch()">Buscar</button>
+             </div>
+         </div>
+     </div>
+
+     <!-- Maintenance Modal -->
+     <div id="maintenance-modal" class="modal">
+         <div class="modal-content">
+             <div class="modal-header">
+                 <h3>Agendar Manutenção</h3>
+                 <span class="close" onclick="closeModal('maintenance-modal')">&times;</span>
+             </div>
+             <form id="maintenance-form" class="modal-form">
+                 <div class="form-group">
+                     <label for="maintenance-tool">Ferramenta:</label>
+                     <select id="maintenance-tool" required>
+                         <option value="">Selecione uma ferramenta...</option>
+                     </select>
+                 </div>
+                 <div class="form-row">
+                     <div class="form-group">
+                         <label for="maintenance-type">Tipo de Manutenção:</label>
+                         <select id="maintenance-type" required>
+                             <option value="">Selecione...</option>
+                             <option value="preventiva">Preventiva</option>
+                             <option value="corretiva">Corretiva</option>
+                             <option value="calibracao">Calibração</option>
+                             <option value="limpeza">Limpeza</option>
+                         </select>
+                     </div>
+                     <div class="form-group">
+                         <label for="maintenance-priority">Prioridade:</label>
+                         <select id="maintenance-priority" required>
+                             <option value="">Selecione...</option>
+                             <option value="baixa">Baixa</option>
+                             <option value="media">Média</option>
+                             <option value="alta">Alta</option>
+                             <option value="urgente">Urgente</option>
+                         </select>
+                     </div>
+                 </div>
+                 <div class="form-row">
+                     <div class="form-group">
+                         <label for="maintenance-date">Data Agendada:</label>
+                         <input type="date" id="maintenance-date" required>
+                     </div>
+                     <div class="form-group">
+                         <label for="maintenance-time">Horário:</label>
+                         <input type="time" id="maintenance-time" required>
+                     </div>
+                 </div>
+                 <div class="form-group">
+                     <label for="maintenance-description">Descrição:</label>
+                     <textarea id="maintenance-description" rows="3" placeholder="Descreva o que será feito na manutenção..."></textarea>
+                 </div>
+                 <div class="form-group">
+                     <label for="maintenance-technician">Técnico Responsável:</label>
+                     <input type="text" id="maintenance-technician" placeholder="Nome do técnico...">
+                 </div>
+                 <div class="modal-actions">
+                     <button type="button" class="btn-secondary" onclick="closeModal('maintenance-modal')">Cancelar</button>
+                     <button type="submit" class="btn-primary">Agendar Manutenção</button>
+                 </div>
+             </form>
+         </div>
+     </div>
+
+     <!-- Confirmation Modal -->
+     <div id="confirmation-modal" class="modal">
+         <div class="modal-content">
+             <div class="modal-header">
+                 <h3>Confirmar Ação</h3>
+                 <span class="close" onclick="closeModal('confirmation-modal')">&times;</span>
+             </div>
+             <div class="modal-body">
+                 <p id="confirmation-message">Tem certeza que deseja realizar esta ação?</p>
+             </div>
+             <div class="modal-actions">
+                 <button type="button" class="btn-secondary" onclick="closeModal('confirmation-modal')">Cancelar</button>
+                 <button type="button" class="btn-danger" id="confirm-action">Confirmar</button>
+             </div>
+         </div>
+     </div>
+
+     <!-- Import Report Modal -->
+     <div id="import-report-modal" class="modal">
+         <div class="modal-content">
+             <div class="modal-header">
+                 <h3>Resultado da Importação</h3>
+                 <span class="close" onclick="closeModal('import-report-modal')">&times;</span>
+             </div>
+             <div class="modal-body">
+                 <div id="import-report-summary"></div>
+                 <div id="import-report-errors" class="tools-table-container" style="margin-top:16px; display:none;">
+                     <table class="tools-table">
+                         <thead>
+                             <tr>
+                                 <th>Linha</th>
+                                 <th>Código</th>
+                                 <th>Erro</th>
+                             </tr>
+                         </thead>
+                         <tbody id="import-report-errors-body"></tbody>
+                     </table>
+                 </div>
+             </div>
+             <div class="modal-actions">
+                 <button type="button" class="btn-secondary" onclick="closeModal('import-report-modal')">Fechar</button>
+                 <button type="button" class="btn-primary" id="btn-download-import-errors" style="display:none;" onclick="downloadImportErrorsCSV()">Baixar Erros (.csv)</button>
+             </div>
+         </div>
+     </div>
+
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
